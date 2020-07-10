@@ -16,8 +16,10 @@ For example:
 
 The fileserver will now be running with the root document path set as `/home/yourusername/`
 Files from the server can now be fetched using HTTP GET requests.
-For example, if the server has the file `/home/yourusername/helloworld.html`, 
+
+For example, if the server has the file `/home/yourusername/helloworld.html`
 users can now access the helloworld.html file in their browser by going to serverip:8080/helloworld.html
+
 If the browser is running on the same machine as the server, it can be accessed by going to localhost:8080/helloworld.html
 
 ### Manpage
