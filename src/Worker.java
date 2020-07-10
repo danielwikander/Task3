@@ -3,14 +3,16 @@ import java.net.Socket;
 import java.util.Date;
 
 /**
- * The Worker class handles incoming HTTP requests.
+ * The Worker handles an incoming HTTP request.
  * Each instance of this class handles a single request.
  */
 public class Worker implements Runnable {
     protected Socket clientSocket;
+    private String documentRootPath;
 
-    public Worker(Socket clientSocket) {
+    public Worker(Socket clientSocket, String documentRootPath) {
         this.clientSocket = clientSocket;
+        this.documentRootPath = documentRootPath;
     }
 
     /**
@@ -33,7 +35,7 @@ public class Worker implements Runnable {
             log(clientSocket, request);
 
             // Extract filepath from request
-            String path = request.substring(5, request.length()-9).trim();
+            String path = documentRootPath + "/" + request.substring(5, request.length()-9).trim();
             File requestedFile = new File(path);
 
             // If the requested file is a directory, add 'index.html'
@@ -70,7 +72,7 @@ public class Worker implements Runnable {
      * @param file The file to send.
      * @param out  The OutputStream connected to the client.
      */
-    private static void sendFile(InputStream file, OutputStream out) {
+    private void sendFile(InputStream file, OutputStream out) {
         try {
             byte[] buffer = new byte[1000];
             while (file.available() > 0)
@@ -85,7 +87,7 @@ public class Worker implements Runnable {
      * @param connection The clients socket, contains the clients IP and port information etc.
      * @param msg        The message to log.
      */
-    private static void log(Socket connection, String msg) {
+    private void log(Socket connection, String msg) {
         System.err.println(new Date() + " [" + connection.getInetAddress().getHostAddress() +
                 ":" + connection.getPort() + "] " + msg);
     }
@@ -98,7 +100,7 @@ public class Worker implements Runnable {
      * @param title      The title of the message to send.
      * @param msg        The message to send to the client.
      */
-    private static void errorReport(PrintStream pout, Socket connection, String code, String title, String msg) {
+    private void errorReport(PrintStream pout, Socket connection, String code, String title, String msg) {
         pout.print("HTTP/1.0 " + code + " " + title + "\r\n" +
                 "\r\n" +
                 "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" +

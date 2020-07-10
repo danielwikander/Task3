@@ -7,48 +7,48 @@ public class TaskThree {
             return;
         }
 
+        // Parse port and documentRootPath from args.
         int port;
+        String documentRootPath;
         try {
             port = Integer.parseInt(args[0]);
+            documentRootPath = args[1];
         } catch (Exception e) {
-            System.out.println("The TaskThree fileserver requires a port number as an argument.");
+            System.out.println("The TaskThree fileserver requires a port number and a document root path as an argument.");
             System.out.println("Execute 'TaskThree -h' for help.");
             return;
         }
 
-        Server server = new Server(port);
-        new Thread(server).start();
+        // Create and start server
+        Server server = new Server(port, documentRootPath);
+        server.start();
 
-        try {
-            Thread.sleep(1000 * 60 * 60); // Run for an hour..
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Stop server if interrupted
         System.out.println("Stopping server..");
         server.stop();
     }
 
     /**
      * Prints the programs manpage.
-     * TODO: FIXto TaskThree 
      */
     public static void printManPage() {
         System.out.println(
             "NAME\n" +
             "    TaskThree - HTTP Fileserver.\n\n" +
             "SYNOPSIS \n" +
-            "    TaskThree [portnumber] \n\n" +
+            "    TaskThree [port] \n\n" +
             "DESCRIPTION\n" +
             "    An HTTP Fileserver that returns files to requesting users.\n" +
-            "    Requires one argument to run (port).\n" +
-            "    After starting the fileserver, files can be retrieved using HTTP GET requests .\n\n" +
+            "    Requires both arguments to run.\n" +
+            "    After starting the fileserver, files can be retrieved using HTTP GET requests on the relevant path.\n\n" +
             "ARGUMENTS\n" +
-            "    port:         The path the the file to create/overwrite. Must be a valid filepath.\n\n" +
+            "    port:     The port to listen for requests on.\n" +
+            "    rootpath: The document root path where file requests will originate from.\n\n" +
             "EXAMPLES\n" +
-            "    TaskThree 8080\n" +
-            "        The fileserver starts on port 8080. Users can now connect to the fileserver by \n" +
-            "    TaskThree 5000 \n" +
-            "        The file 'testFile' will be read and its numbers will be printed in ascending order. \n");
+            "    TaskThree 8080 /home/testname/\n" +
+            "        The fileserver starts on port 8080, and the document root path has been set to /home/testname/\n" +
+            "    TaskThree 5000 /home/testname/testfolder\n" +
+            "        The fileserver starts on port 5000, and the document root path has been set to /home/testname/testfolder\n");
     }
 }
 

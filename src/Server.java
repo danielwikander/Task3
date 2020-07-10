@@ -5,28 +5,28 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * The main server.
- * The Server holds the Server Socket that clients send requests to.
- * The Server handles these requests by handing them to Worker threads.
- * The threadpool is a fixed pool with 10 threads in order to prevent thread starvation.
+ * The Server holds the ServerSocket that clients send requests to.
+ * The Server handles these requests by handing them over to Worker threads.
+ * The Worker threads are in turn handled by a fixed size threadpool,
+ * which limits the number of simultaneously running Workers to 10 in order to prevent thread starvation.
  */
-public class Server implements Runnable {
-
-    // Uses a fixed threadpool with 10 threads in order to prevent thread starvation.
+public class Server {
     private final ExecutorService threadPool = Executors.newFixedThreadPool(10);
     private ServerSocket serverSocket = null;
     private boolean running = true;
-    private int port = 8080;
+    private int port;
+    private String documentRootPath;
 
-    public Server(int port) {
+    public Server(int port, String documentRootPath) {
         this.port = port;
+        this.documentRootPath = documentRootPath;
     }
 
     /**
      * Runs the server.
      * Continually looks for clients and hands them to the treadpool for Workers to handle.
      */
-    public void run() {
+    public void start() {
         openServerSocket();
         while (isRunning()) {
             Socket clientSocket = null;
@@ -39,7 +39,7 @@ public class Server implements Runnable {
                 }
                 System.err.println("Error accepting connection from client: " + e.getMessage());
             }
-            this.threadPool.execute(new Worker(clientSocket));
+            this.threadPool.execute(new Worker(clientSocket, documentRootPath));
         }
         this.threadPool.shutdown();
         System.out.println("Server Stopped.");
@@ -49,14 +49,14 @@ public class Server implements Runnable {
      * Checks if the server is running or not.
      * @return true if the server is running.
      */
-    private synchronized boolean isRunning() {
+    private boolean isRunning() {
         return this.running;
     }
 
     /**
      * Stops the server thread.
      */
-    public synchronized void stop() {
+    public void stop() {
         this.running = false;
         try {
             this.serverSocket.close();
